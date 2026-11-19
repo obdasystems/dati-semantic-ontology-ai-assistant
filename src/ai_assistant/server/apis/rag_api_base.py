@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
+from fastapi import Request
 
 from pydantic import StrictStr
 from typing import Any, Optional
@@ -21,7 +22,8 @@ class BaseRAGApi:
         BaseRAGApi.subclasses = BaseRAGApi.subclasses + (cls,)
     async def put_ontology_draft_ai(
         self,
-        name: StrictStr,
+        request: Request,
+        name: str,
         put_ontology_draft_ai_request: Optional[PutOntologyDraftAIRequest],
     ) -> RDFGraph:
         ...
@@ -29,6 +31,7 @@ class BaseRAGApi:
 
     async def put_ontology_query_ai(
         self,
+        request: Request,
         put_ontology_query_ai_request: Optional[PutOntologyQueryAIRequest],
     ) -> PutOntologyQueryAI200Response:
         ...
@@ -36,6 +39,7 @@ class BaseRAGApi:
 
     async def post_ontology_rdf_examples(
         self,
+        request: Request,
         post_ontology_rdf_examples_request: Optional[PostOntologyRDFExamplesRequest],
     ) -> str:
         ...
@@ -43,6 +47,7 @@ class BaseRAGApi:
 
     async def post_ontology_summary(
         self,
+        request: Request,
         post_ontology_summary_request: Optional[PostOntologySummaryRequest],
     ) -> str:
         ...
@@ -50,7 +55,8 @@ class BaseRAGApi:
 
     async def check_vector_db_status(
         self,
-        ontologyName: StrictStr,
-        ontology_version: StrictStr,
+        request: Request,
+        ontologyName: str,
+        ontology_version: str,
     ) -> VectorDBStatus:
         ...

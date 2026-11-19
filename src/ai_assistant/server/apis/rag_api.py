@@ -20,9 +20,9 @@ from fastapi import (  # noqa: F401
     Response,
     Security,
     status,
+    Request
 )
 
-from ai_assistant.server.models.extra_models import TokenModel  # noqa: F401
 from pydantic import StrictStr
 from typing import Any, Optional
 from ai_assistant.server.models.post_ontology_rdf_examples_request import PostOntologyRDFExamplesRequest
@@ -32,6 +32,7 @@ from ai_assistant.server.models.put_ontology_query_ai200_response import PutOnto
 from ai_assistant.server.models.put_ontology_query_ai_request import PutOntologyQueryAIRequest
 from ai_assistant.server.models.rdf_graph import RDFGraph
 from ai_assistant.server.models.vector_db_status import VectorDBStatus
+from ai_assistant.server.models.extra_models import TokenModel  # noqa: F401
 from ai_assistant.server.security_api import get_token_jwt
 
 router = APIRouter()
@@ -52,7 +53,8 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     response_model_by_alias=True,
 )
 async def put_ontology_draft_ai(
-    name: StrictStr = Path(..., description=""),
+    request: Request,
+    name: str = Path(..., description=""),
     put_ontology_draft_ai_request: Optional[PutOntologyDraftAIRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -60,7 +62,7 @@ async def put_ontology_draft_ai(
 ) -> RDFGraph:
     if not BaseRAGApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseRAGApi.subclasses[0]().put_ontology_draft_ai(name, put_ontology_draft_ai_request)
+    return await BaseRAGApi.subclasses[0]().put_ontology_draft_ai(request, name, put_ontology_draft_ai_request)
 
 
 @router.put(
@@ -74,6 +76,7 @@ async def put_ontology_draft_ai(
     response_model_by_alias=True,
 )
 async def put_ontology_query_ai(
+    request: Request,
     put_ontology_query_ai_request: Optional[PutOntologyQueryAIRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -81,7 +84,7 @@ async def put_ontology_query_ai(
 ) -> PutOntologyQueryAI200Response:
     if not BaseRAGApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseRAGApi.subclasses[0]().put_ontology_query_ai(put_ontology_query_ai_request)
+    return await BaseRAGApi.subclasses[0]().put_ontology_query_ai(request, put_ontology_query_ai_request)
 
 
 @router.post(
@@ -95,6 +98,7 @@ async def put_ontology_query_ai(
     response_model_by_alias=True,
 )
 async def post_ontology_rdf_examples(
+    request: Request,
     post_ontology_rdf_examples_request: Optional[PostOntologyRDFExamplesRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -102,7 +106,7 @@ async def post_ontology_rdf_examples(
 ) -> str:
     if not BaseRAGApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseRAGApi.subclasses[0]().post_ontology_rdf_examples(post_ontology_rdf_examples_request)
+    return await BaseRAGApi.subclasses[0]().post_ontology_rdf_examples(request, post_ontology_rdf_examples_request)
 
 
 @router.post(
@@ -116,6 +120,7 @@ async def post_ontology_rdf_examples(
     response_model_by_alias=True,
 )
 async def post_ontology_summary(
+    request: Request,
     post_ontology_summary_request: Optional[PostOntologySummaryRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -123,7 +128,7 @@ async def post_ontology_summary(
 ) -> str:
     if not BaseRAGApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseRAGApi.subclasses[0]().post_ontology_summary(post_ontology_summary_request)
+    return await BaseRAGApi.subclasses[0]().post_ontology_summary(request, post_ontology_summary_request)
 
 
 @router.get(
@@ -137,12 +142,13 @@ async def post_ontology_summary(
     response_model_by_alias=True,
 )
 async def check_vector_db_status(
-    ontologyName: StrictStr = Path(..., description=""),
-    ontology_version: StrictStr = Query(None, description="", alias="ontologyVersion"),
+    request: Request,
+    ontologyName: str = Path(..., description=""),
+    ontology_version: str = Query(..., description="", alias="ontologyVersion"),
     token_jwt: TokenModel = Security(
         get_token_jwt
     ),
 ) -> VectorDBStatus:
     if not BaseRAGApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseRAGApi.subclasses[0]().check_vector_db_status(ontologyName, ontology_version)
+    return await BaseRAGApi.subclasses[0]().check_vector_db_status(request, ontologyName, ontology_version)

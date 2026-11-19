@@ -21,8 +21,8 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from typing import Any, ClassVar, Dict, List
 from ai_assistant.server.models.rdf_graph import RDFGraph
 try:
     from typing import Self
@@ -34,9 +34,9 @@ class OWL2RDFGraphConversionResult(BaseModel):
     OWL2RDFGraphConversionResult
     """ # noqa: E501
     rdf_graph: RDFGraph = Field(alias="rdfGraph")
-    rejected_axioms: Union[StrictFloat, StrictInt] = Field(alias="rejectedAxioms")
-    accepted_axioms: Union[StrictFloat, StrictInt] = Field(alias="acceptedAxioms")
-    original_axioms: Union[StrictFloat, StrictInt] = Field(alias="originalAxioms")
+    rejected_axioms: StrictInt = Field(alias="rejectedAxioms")
+    accepted_axioms: StrictInt = Field(alias="acceptedAxioms")
+    original_axioms: StrictInt = Field(alias="originalAxioms")
     __properties: ClassVar[List[str]] = ["rdfGraph", "rejectedAxioms", "acceptedAxioms", "originalAxioms"]
 
     model_config = {

@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
+from fastapi import Request
 
 from pydantic import StrictBytes, StrictStr
 from typing import Any, Optional, Tuple, Union
@@ -17,7 +18,8 @@ class BaseConvertApi:
         BaseConvertApi.subclasses = BaseConvertApi.subclasses + (cls,)
     async def get_ontology_draft_ai_download(
         self,
-        format: Optional[StrictStr],
+        request: Request,
+        format: Optional[str],
         rdf_graph: Optional[RDFGraph],
     ) -> str:
         ...
@@ -25,7 +27,8 @@ class BaseConvertApi:
 
     async def get_ontology_draft_ai_download_rejected_axioms(
         self,
-        format: Optional[StrictStr],
+        request: Request,
+        format: Optional[str],
         file: Optional[UploadFile],
     ) -> str:
         ...
@@ -33,6 +36,7 @@ class BaseConvertApi:
 
     async def post_ontology_draft_ai_convert_owl(
         self,
+        request: Request,
         file: Optional[UploadFile],
     ) -> OWL2RDFGraphConversionResult:
         ...

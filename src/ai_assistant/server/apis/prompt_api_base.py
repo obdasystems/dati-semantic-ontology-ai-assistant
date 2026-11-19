@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
+from fastapi import Request
 
 from pydantic import StrictStr
 from typing import Any, List, Optional
@@ -22,6 +23,7 @@ class BasePromptApi:
         BasePromptApi.subclasses = BasePromptApi.subclasses + (cls,)
     async def describe_ontology_entity(
         self,
+        request: Request,
         describe_ontology_entity_request: Optional[DescribeOntologyEntityRequest],
     ) -> str:
         ...
@@ -29,6 +31,7 @@ class BasePromptApi:
 
     async def describe_individual(
         self,
+        request: Request,
         describe_individual_request: Optional[DescribeIndividualRequest],
     ) -> str:
         ...
@@ -36,6 +39,7 @@ class BasePromptApi:
 
     async def suggest_class_data_properties(
         self,
+        request: Request,
         suggest_class_data_properties_request: Optional[SuggestClassDataPropertiesRequest],
     ) -> List[str]:
         ...
@@ -43,6 +47,7 @@ class BasePromptApi:
 
     async def suggest_class_subclasses(
         self,
+        request: Request,
         suggest_class_data_properties_request: Optional[SuggestClassDataPropertiesRequest],
     ) -> List[str]:
         ...
@@ -50,6 +55,7 @@ class BasePromptApi:
 
     async def describe_sparql_query(
         self,
+        request: Request,
         describe_sparql_query_request: Optional[DescribeSparqlQueryRequest],
     ) -> str:
         ...
@@ -57,6 +63,7 @@ class BasePromptApi:
 
     async def auto_chart(
         self,
+        request: Request,
         auto_chart_request: Optional[AutoChartRequest],
     ) -> ChartConfiguration:
         ...
@@ -64,6 +71,7 @@ class BasePromptApi:
 
     async def describe_chart(
         self,
+        request: Request,
         describe_chart_request: Optional[DescribeChartRequest],
     ) -> str:
         ...
@@ -71,6 +79,7 @@ class BasePromptApi:
 
     async def text2sparql(
         self,
+        request: Request,
         text2sparql_request: Optional[Text2sparqlRequest],
     ) -> str:
         ...

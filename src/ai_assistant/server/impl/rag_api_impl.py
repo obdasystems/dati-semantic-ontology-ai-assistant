@@ -5,7 +5,7 @@ import os
 from typing import Optional
 import networkx as nx
 
-from fastapi import HTTPException, BackgroundTasks
+from fastapi import Request, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pydantic import StrictStr, StrictBool
 
@@ -34,10 +34,11 @@ from ai_assistant.utils import (
 class RAGApiImpl(BaseRAGApi):
     async def put_ontology_draft_ai(
             self,
+            request: Request,
             name: StrictStr,
             put_ontology_draft_ai_request: Optional[PutOntologyDraftAIRequest],
     ) -> RDFGraph:
-        from ..main import app
+        app = request.app
 
         # If `current_rdf_graph` exists (is not None), it cannot be empty.
         if put_ontology_draft_ai_request.current_rdf_graph is not None:
@@ -78,9 +79,10 @@ class RAGApiImpl(BaseRAGApi):
 
     async def put_ontology_query_ai(
             self,
+            request: Request,
             put_ontology_query_ai_request: Optional[PutOntologyQueryAIRequest],
     ) -> PutOntologyQueryAI200Response:
-        from ..main import app
+        app = request.app
 
         query = put_ontology_query_ai_request.text
         graph = put_ontology_query_ai_request.current_rdf_graph
@@ -115,9 +117,10 @@ class RAGApiImpl(BaseRAGApi):
 
     async def post_ontology_rdf_examples(
             self,
+            request: Request,
             post_ontology_rdf_examples_request: Optional[PostOntologyRDFExamplesRequest],
     ) -> str:
-        from ..main import app
+        app = request.app
 
         graph = post_ontology_rdf_examples_request.current_rdf_graph
         classes = post_ontology_rdf_examples_request.classes
@@ -149,9 +152,10 @@ class RAGApiImpl(BaseRAGApi):
 
     async def post_ontology_summary(
             self,
+            request: Request,
             post_ontology_summary_request: Optional[PostOntologySummaryRequest],
     ) -> str:
-        from ..main import app
+        app = request.app
 
         graph = post_ontology_summary_request.current_rdf_graph
 

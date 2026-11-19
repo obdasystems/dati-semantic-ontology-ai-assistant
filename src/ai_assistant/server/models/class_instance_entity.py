@@ -40,10 +40,11 @@ class ClassInstanceEntity(BaseModel):
     datatype: Optional[StrictStr] = None
     is_data_property_functional: Optional[StrictBool] = Field(default=False, alias="isDataPropertyFunctional")
     function_properties: Optional[List[FunctionPropertiesEnum]] = Field(default=None, alias="functionProperties")
+    main_occurrences: Optional[Dict[str, StrictStr]] = Field(default=None, alias="mainOccurrences", json_schema_extra={"examples": [{"graphol": "n0", "floaty": "e1"}]})
     parent_classes: Optional[List[StrictStr]] = Field(default=None, alias="parentClasses")
     data_properties: Optional[List[DataPropertyValue]] = Field(default=None, alias="dataProperties")
     short_iri: Optional[StrictStr] = Field(default=None, alias="shortIri")
-    __properties: ClassVar[List[str]] = ["fullIri", "annotations", "datatype", "isDataPropertyFunctional", "functionProperties", "parentClasses", "dataProperties", "shortIri"]
+    __properties: ClassVar[List[str]] = ["fullIri", "annotations", "datatype", "isDataPropertyFunctional", "functionProperties", "mainOccurrences", "parentClasses", "dataProperties", "shortIri"]
 
     model_config = {
         "populate_by_name": True,
@@ -113,6 +114,7 @@ class ClassInstanceEntity(BaseModel):
             "datatype": obj.get("datatype"),
             "isDataPropertyFunctional": obj.get("isDataPropertyFunctional") if obj.get("isDataPropertyFunctional") is not None else False,
             "functionProperties": obj.get("functionProperties"),
+            "mainOccurrences": obj.get("mainOccurrences"),
             "parentClasses": obj.get("parentClasses"),
             "dataProperties": [DataPropertyValue.from_dict(_item) for _item in obj.get("dataProperties")] if obj.get("dataProperties") is not None else None,
             "shortIri": obj.get("shortIri")

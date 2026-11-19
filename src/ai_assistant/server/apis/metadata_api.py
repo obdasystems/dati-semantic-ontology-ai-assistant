@@ -20,13 +20,13 @@ from fastapi import (  # noqa: F401
     Response,
     Security,
     status,
+    Request
 )
 
-from ai_assistant.server.models.extra_models import TokenModel  # noqa: F401
 from pydantic import StrictBytes, StrictStr
 from typing import Any, Optional, Tuple, Union
-from ai_assistant.server.models.mwsx_ontology_catalog_ontology_metadata_set import MWSXOntologyCatalogOntologyMetadataSet
 from fastapi import File, UploadFile
+from ai_assistant.server.models.extra_models import TokenModel  # noqa: F401
 from ai_assistant.server.security_api import get_token_jwt
 
 router = APIRouter()
@@ -47,15 +47,15 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     response_model_by_alias=True,
 )
 async def post_ai_ontology_draft_metadata(
-    format: Optional[StrictStr] = Query(None, description="", alias="format"),
-    new_version: Optional[StrictStr] = Query(None, description="", alias="newVersion"),
-    file: Optional[UploadFile] = File(None, description=""),
-    # modified by hand as the generation is wrong: the json must be parsed as a file
-    metadata: Optional[UploadFile] = File(None, description=""),
+    request: Request,
+    format: Optional[str] = Query(None, description="", alias="format"),
+    new_version: Optional[str] = Query(None, description="", alias="newVersion"),
+    file: Optional[UploadFile] = File(None, description="", alias="file"),
+    metadata: Optional[UploadFile] = File(None, description="", alias="metadata"),
     token_jwt: TokenModel = Security(
         get_token_jwt
     ),
 ) -> str:
     if not BaseMetadataApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseMetadataApi.subclasses[0]().post_ai_ontology_draft_metadata(format, new_version, file, metadata)
+    return await BaseMetadataApi.subclasses[0]().post_ai_ontology_draft_metadata(request, format, new_version, file, metadata)

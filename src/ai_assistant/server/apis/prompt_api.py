@@ -20,9 +20,9 @@ from fastapi import (  # noqa: F401
     Response,
     Security,
     status,
+    Request
 )
 
-from ai_assistant.server.models.extra_models import TokenModel  # noqa: F401
 from pydantic import StrictStr
 from typing import Any, List, Optional
 from ai_assistant.server.models.auto_chart_request import AutoChartRequest
@@ -33,6 +33,7 @@ from ai_assistant.server.models.describe_ontology_entity_request import Describe
 from ai_assistant.server.models.describe_sparql_query_request import DescribeSparqlQueryRequest
 from ai_assistant.server.models.suggest_class_data_properties_request import SuggestClassDataPropertiesRequest
 from ai_assistant.server.models.text2sparql_request import Text2sparqlRequest
+from ai_assistant.server.models.extra_models import TokenModel  # noqa: F401
 from ai_assistant.server.security_api import get_token_jwt
 
 router = APIRouter()
@@ -53,6 +54,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     response_model_by_alias=True,
 )
 async def describe_ontology_entity(
+    request: Request,
     describe_ontology_entity_request: Optional[DescribeOntologyEntityRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -60,7 +62,7 @@ async def describe_ontology_entity(
 ) -> str:
     if not BasePromptApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BasePromptApi.subclasses[0]().describe_ontology_entity(describe_ontology_entity_request)
+    return await BasePromptApi.subclasses[0]().describe_ontology_entity(request, describe_ontology_entity_request)
 
 
 @router.post(
@@ -74,6 +76,7 @@ async def describe_ontology_entity(
     response_model_by_alias=True,
 )
 async def describe_individual(
+    request: Request,
     describe_individual_request: Optional[DescribeIndividualRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -81,7 +84,7 @@ async def describe_individual(
 ) -> str:
     if not BasePromptApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BasePromptApi.subclasses[0]().describe_individual(describe_individual_request)
+    return await BasePromptApi.subclasses[0]().describe_individual(request, describe_individual_request)
 
 
 @router.post(
@@ -95,6 +98,7 @@ async def describe_individual(
     response_model_by_alias=True,
 )
 async def suggest_class_data_properties(
+    request: Request,
     suggest_class_data_properties_request: Optional[SuggestClassDataPropertiesRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -102,7 +106,7 @@ async def suggest_class_data_properties(
 ) -> List[str]:
     if not BasePromptApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BasePromptApi.subclasses[0]().suggest_class_data_properties(suggest_class_data_properties_request)
+    return await BasePromptApi.subclasses[0]().suggest_class_data_properties(request, suggest_class_data_properties_request)
 
 
 @router.post(
@@ -116,6 +120,7 @@ async def suggest_class_data_properties(
     response_model_by_alias=True,
 )
 async def suggest_class_subclasses(
+    request: Request,
     suggest_class_data_properties_request: Optional[SuggestClassDataPropertiesRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -123,7 +128,7 @@ async def suggest_class_subclasses(
 ) -> List[str]:
     if not BasePromptApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BasePromptApi.subclasses[0]().suggest_class_subclasses(suggest_class_data_properties_request)
+    return await BasePromptApi.subclasses[0]().suggest_class_subclasses(request, suggest_class_data_properties_request)
 
 
 @router.post(
@@ -137,6 +142,7 @@ async def suggest_class_subclasses(
     response_model_by_alias=True,
 )
 async def describe_sparql_query(
+    request: Request,
     describe_sparql_query_request: Optional[DescribeSparqlQueryRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -144,7 +150,7 @@ async def describe_sparql_query(
 ) -> str:
     if not BasePromptApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BasePromptApi.subclasses[0]().describe_sparql_query(describe_sparql_query_request)
+    return await BasePromptApi.subclasses[0]().describe_sparql_query(request, describe_sparql_query_request)
 
 
 @router.post(
@@ -158,6 +164,7 @@ async def describe_sparql_query(
     response_model_by_alias=True,
 )
 async def auto_chart(
+    request: Request,
     auto_chart_request: Optional[AutoChartRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -165,7 +172,7 @@ async def auto_chart(
 ) -> ChartConfiguration:
     if not BasePromptApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BasePromptApi.subclasses[0]().auto_chart(auto_chart_request)
+    return await BasePromptApi.subclasses[0]().auto_chart(request, auto_chart_request)
 
 
 @router.post(
@@ -179,6 +186,7 @@ async def auto_chart(
     response_model_by_alias=True,
 )
 async def describe_chart(
+    request: Request,
     describe_chart_request: Optional[DescribeChartRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -186,7 +194,7 @@ async def describe_chart(
 ) -> str:
     if not BasePromptApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BasePromptApi.subclasses[0]().describe_chart(describe_chart_request)
+    return await BasePromptApi.subclasses[0]().describe_chart(request, describe_chart_request)
 
 
 @router.post(
@@ -200,6 +208,7 @@ async def describe_chart(
     response_model_by_alias=True,
 )
 async def text2sparql(
+    request: Request,
     text2sparql_request: Optional[Text2sparqlRequest] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -207,4 +216,4 @@ async def text2sparql(
 ) -> str:
     if not BasePromptApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BasePromptApi.subclasses[0]().text2sparql(text2sparql_request)
+    return await BasePromptApi.subclasses[0]().text2sparql(request, text2sparql_request)

@@ -39,7 +39,8 @@ class GrapholscapeEntity(BaseModel):
     datatype: Optional[StrictStr] = None
     is_data_property_functional: Optional[StrictBool] = Field(default=False, alias="isDataPropertyFunctional")
     function_properties: Optional[List[FunctionPropertiesEnum]] = Field(default=None, alias="functionProperties")
-    __properties: ClassVar[List[str]] = ["fullIri", "annotations", "datatype", "isDataPropertyFunctional", "functionProperties"]
+    main_occurrences: Optional[Dict[str, StrictStr]] = Field(default=None, alias="mainOccurrences", json_schema_extra={"examples": [{"graphol": "n0", "floaty": "e1"}]})
+    __properties: ClassVar[List[str]] = ["fullIri", "annotations", "datatype", "isDataPropertyFunctional", "functionProperties", "mainOccurrences"]
 
     model_config = {
         "populate_by_name": True,
@@ -101,7 +102,8 @@ class GrapholscapeEntity(BaseModel):
             "annotations": [GrapholscapeAnnotation.from_dict(_item) for _item in obj.get("annotations")] if obj.get("annotations") is not None else None,
             "datatype": obj.get("datatype"),
             "isDataPropertyFunctional": obj.get("isDataPropertyFunctional") if obj.get("isDataPropertyFunctional") is not None else False,
-            "functionProperties": obj.get("functionProperties")
+            "functionProperties": obj.get("functionProperties"),
+            "mainOccurrences": obj.get("mainOccurrences")
         })
         return _obj
 

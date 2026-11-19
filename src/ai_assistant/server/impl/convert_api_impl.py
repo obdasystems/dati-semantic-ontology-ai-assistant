@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import UploadFile, HTTPException
+from fastapi import Request, UploadFile, HTTPException
 from pydantic.v1 import StrictStr
 
 from ai_assistant.server.apis.convert_api_base import BaseConvertApi
@@ -11,6 +11,7 @@ from ai_assistant.owl import OWL2Gscape, parse_ontology
 class ConvertApiImpl(BaseConvertApi):
     async def get_ontology_draft_ai_download(
             self,
+            request: Request,
             format: Optional[StrictStr],
             rdf_graph: Optional[RDFGraph],
     ) :
@@ -24,6 +25,7 @@ class ConvertApiImpl(BaseConvertApi):
 
     async def post_ontology_draft_ai_convert_owl(
             self,
+            request: Request,
             file: UploadFile,
     ) -> OWL2RDFGraphConversionResult:
         ontology_file = await file.read()
@@ -44,6 +46,7 @@ class ConvertApiImpl(BaseConvertApi):
 
     async def get_ontology_draft_ai_download_rejected_axioms(
             self,
+            request: Request,
             format: Optional[StrictStr],
             file: UploadFile,
     ) :

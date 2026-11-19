@@ -20,14 +20,15 @@ from fastapi import (  # noqa: F401
     Response,
     Security,
     status,
+    Request
 )
 
-from ai_assistant.server.models.extra_models import TokenModel  # noqa: F401
 from pydantic import StrictBytes, StrictStr
 from typing import Any, Optional, Tuple, Union
 from ai_assistant.server.models.owl2_rdf_graph_conversion_result import OWL2RDFGraphConversionResult
 from ai_assistant.server.models.rdf_graph import RDFGraph
 from fastapi import File, UploadFile
+from ai_assistant.server.models.extra_models import TokenModel  # noqa: F401
 from ai_assistant.server.security_api import get_token_jwt
 
 router = APIRouter()
@@ -48,7 +49,8 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     response_model_by_alias=True,
 )
 async def get_ontology_draft_ai_download(
-    format: Optional[StrictStr] = Query(None, description="", alias="format"),
+    request: Request,
+    format: Optional[str] = Query(None, description="", alias="format"),
     rdf_graph: Optional[RDFGraph] = Body(None, description=""),
     token_jwt: TokenModel = Security(
         get_token_jwt
@@ -56,7 +58,7 @@ async def get_ontology_draft_ai_download(
 ) -> str:
     if not BaseConvertApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseConvertApi.subclasses[0]().get_ontology_draft_ai_download(format, rdf_graph)
+    return await BaseConvertApi.subclasses[0]().get_ontology_draft_ai_download(request, format, rdf_graph)
 
 
 @router.post(
@@ -70,15 +72,16 @@ async def get_ontology_draft_ai_download(
     response_model_by_alias=True,
 )
 async def get_ontology_draft_ai_download_rejected_axioms(
-    format: Optional[StrictStr] = Query(None, description="", alias="format"),
-    file: Optional[UploadFile] = File(None, description=""),
+    request: Request,
+    format: Optional[str] = Query(None, description="", alias="format"),
+    file: Optional[UploadFile] = File(None, description="", alias="file"),
     token_jwt: TokenModel = Security(
         get_token_jwt
     ),
 ) -> str:
     if not BaseConvertApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseConvertApi.subclasses[0]().get_ontology_draft_ai_download_rejected_axioms(format, file)
+    return await BaseConvertApi.subclasses[0]().get_ontology_draft_ai_download_rejected_axioms(request, format, file)
 
 
 @router.post(
@@ -92,11 +95,12 @@ async def get_ontology_draft_ai_download_rejected_axioms(
     response_model_by_alias=True,
 )
 async def post_ontology_draft_ai_convert_owl(
-    file: Optional[UploadFile] = File(None, description=""),
+    request: Request,
+    file: Optional[UploadFile] = File(None, description="", alias="file"),
     token_jwt: TokenModel = Security(
         get_token_jwt
     ),
 ) -> OWL2RDFGraphConversionResult:
     if not BaseConvertApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseConvertApi.subclasses[0]().post_ontology_draft_ai_convert_owl(file)
+    return await BaseConvertApi.subclasses[0]().post_ontology_draft_ai_convert_owl(request, file)

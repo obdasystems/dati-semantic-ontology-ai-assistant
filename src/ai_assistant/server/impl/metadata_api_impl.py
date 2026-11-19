@@ -3,7 +3,7 @@
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 from typing import Optional, Tuple
 
-from fastapi import UploadFile, HTTPException
+from fastapi import Request, UploadFile, HTTPException
 from pydantic import StrictStr
 
 from ai_assistant.gscape import serialize_owl
@@ -18,6 +18,7 @@ class MetadataApiImpl(BaseMetadataApi):
 
     async def post_ai_ontology_draft_metadata(
             self,
+            request: Request,
             format: Optional[StrictStr],
             new_version: Optional[StrictStr],
             file: Optional[UploadFile],
