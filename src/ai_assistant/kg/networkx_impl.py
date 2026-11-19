@@ -1,9 +1,14 @@
 import os
+import sys
+
 from dataclasses import dataclass
 from typing import Union, Tuple, Optional
 
 
-from ai_assistant.utils import logger
+from ai_assistant.utils import (
+    logger,
+    inv_languages,
+)
 
 import pipmaster as pm
 
@@ -20,8 +25,9 @@ class NetworkXStorage(LightRAGNetworkXStorage):
         self._storage_lock = None
         self.storage_updated = None
         language = self.global_config["addon_params"]["language"]
+        lang_tag = inv_languages[language]
         self._graph = nx.MultiDiGraph(
-            config=dict({"language": language}),
+            config=dict({"language": lang_tag}),
         )
         logger.info("Created new empty graph")
 

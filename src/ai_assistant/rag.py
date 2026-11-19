@@ -11,7 +11,7 @@ from dataclasses import (
     field,
 )
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import (
     Any, 
@@ -202,6 +202,7 @@ class OntoRAG(LightRAG):
             split_by_character_only: bool = False,
             ids: str | list[str] | None = None,
             file_paths: str | list[str] | None = None,
+            **metadata,
     ) -> None:
         """Sync Insert documents with checkpoint support
 
@@ -218,7 +219,7 @@ class OntoRAG(LightRAG):
         loop = always_get_an_event_loop()
         loop.run_until_complete(
             self.ainsert(
-                input, split_by_character, split_by_character_only, ids, file_paths
+                input, split_by_character, split_by_character_only, ids, file_paths, **metadata
             )
         )
 
@@ -242,7 +243,7 @@ class OntoRAG(LightRAG):
             file_paths: list of file paths corresponding to each document, used for citation
         """
 
-        await self.apipeline_enqueue_documents(input, ids, file_paths)
+        await self.apipeline_enqueue_documents(input, ids, file_paths)        
         await self.apipeline_process_enqueue_documents(
             split_by_character, split_by_character_only
         )
@@ -754,6 +755,16 @@ class OntoRAG(LightRAG):
                     seen_docs[doc_id]=lang_tag
                 chunk[chunk_id]["lang_tag"] = seen_docs[doc_id]
 
+            nx_graph = await self.chunk_entity_relation_graph.get_graph()
+            if "extract_params" in nx_graph.graph:
+                extract_params = nx_graph.graph["extract_params"]
+            else:
+                extract_params = dict(
+                    iri_format = self.addon_params["iri_format"],
+                    iri_language = self.addon_params["iri_language"],
+                    language = self.addon_params["language"],
+                )
+            
             chunk_results = await extract_entity_types(
                 chunk,
                 global_config=asdict(self),
@@ -761,6 +772,7 @@ class OntoRAG(LightRAG):
                 pipeline_status_lock=pipeline_status_lock,
                 llm_response_cache=self.llm_response_cache,
                 text_chunks_storage=self.text_chunks,
+                ** extract_params,
             )
             return chunk_results
         except Exception as e:
@@ -771,11 +783,22 @@ class OntoRAG(LightRAG):
                 pipeline_status["history_messages"].append(error_msg)
             raise e
 
-async def initialize_ontorag(**kwargs):
-    load_dotenv(
-        override=False
-    )  # the OS environment variables take precedence over the .env file
-    cwd = kwargs.get("working_dir", tempfile.mkdtemp(prefix="designer-"))
+def initialize_ontorag(**kwargs) -> OntoRAG:
+    loop = always_get_an_event_loop()
+    
+    return loop.run_until_complete(
+        ainitialize_ontorag(**kwargs)
+    )
+
+async def ainitialize_ontorag(**kwargs) -> OntoRAG:
+
+    # the OS environment variables take precedence over the .env file
+    load_dotenv(override=False)  
+    
+    cwd = kwargs.get("working_dir", tempfile.mkdtemp(prefix="ai_assistant-"))
+    ontology_name = kwargs.get("ontology_name", "")
+    ontology_version = re.sub(r"[^A-Za-z0-9_]+", "_", kwargs.get("ontology_version", ""))
+    working_dir = os.path.join(cwd, ontology_name, ontology_version)
 
     rerank_model = RerankModel(
         rerank_func=custom_rerank,
@@ -786,8 +809,9 @@ async def initialize_ontorag(**kwargs):
         },
     )
 
-    designer = OntoRAG(
-        working_dir=cwd,
+    rag = OntoRAG(
+        working_dir=working_dir,
+        workspace=kwargs.get("workspace", get_env_value("WORKSPACE", "")),
         llm_model_name=os.getenv("LLM_MODEL"),
         llm_model_func=vllm_model_complete,
         llm_model_kwargs=(
@@ -818,12 +842,18 @@ async def initialize_ontorag(**kwargs):
         # Rerank Configuration - provide the rerank function
         rerank_model_func=rerank_model.rerank,  # Method 2
 
+        # handle the storage initialization externally
+        auto_manage_storages_states=False
     )
-    await designer.initialize_storages()
-    await initialize_pipeline_status()
-    # Initialize graph
+    
+    # Initialize storage if ask
+    if not bool(kwargs.get("not_initialize_storages")):
+        await rag.initialize_storages()
+        await initialize_pipeline_status()
+
+    # Initialize graph if exist
     if kwargs.get("entity_relation_graph"):
-        await designer.chunk_entity_relation_graph.set_graph(
+        await rag.chunk_entity_relation_graph.set_graph(
             kwargs["entity_relation_graph"]
         )
-    return designer
+    return rag

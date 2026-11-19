@@ -306,12 +306,20 @@ async def _merge_nodes_then_upsert(
     language = global_config["addon_params"].get(
         "language", DEFAULT_LANGUAGE
     )
-    lang_tag = inv_languages[language]
     iri_language = global_config["addon_params"].get(
         "iri_language", DEFAULT_IRI_LANGUAGE
     )
-    iri_lang_tag = inv_languages[iri_language]
     iri_format = global_config["addon_params"].get("iri_format", "camelCase")
+
+    nx_graph = await knowledge_graph_inst.get_graph()
+    if "extract_params" in nx_graph.graph:
+        extract_params = nx_graph.graph["extract_params"]
+        language = extract_params.get("language", language)
+        iri_language = extract_params.get("iri_language", iri_language)
+        iri_format = extract_params.get("iri_format", iri_format)
+
+    lang_tag = inv_languages[language]
+    iri_lang_tag = inv_languages[iri_language]
 
     node_id_without_iri = node_id[len(get_namespace_from_iri(node_id)) :]
     current_graph = await knowledge_graph_inst.get_graph()
@@ -487,12 +495,20 @@ async def _merge_edges_then_upsert(
     language = global_config["addon_params"].get(
         "language", DEFAULT_LANGUAGE
     )
-    lang_tag = inv_languages[language]
     iri_language = global_config["addon_params"].get(
         "iri_language", DEFAULT_IRI_LANGUAGE
     )
-    iri_lang_tag = inv_languages[iri_language]
     iri_format = global_config["addon_params"].get("iri_format", "camelCase")
+
+    nx_graph = await knowledge_graph_inst.get_graph()
+    if "extract_params" in nx_graph.graph:
+        extract_params = nx_graph.graph["extract_params"]
+        language = extract_params.get("language", language)
+        iri_language = extract_params.get("iri_language", iri_language)
+        iri_format = extract_params.get("iri_format", iri_format)
+
+    lang_tag = inv_languages[language]
+    iri_lang_tag = inv_languages[iri_language]
 
     src_id_without_iri = src_id[len(get_namespace_from_iri(src_id)) :]
     tgt_id_without_iri = tgt_id[len(get_namespace_from_iri(tgt_id)) :]
@@ -813,8 +829,12 @@ async def merge_nodes_and_edges(
     all_nodes = defaultdict(list)
     all_edges = defaultdict(list)
 
-    language = global_config["addon_params"].get("language", "italiano")
+    language = global_config["addon_params"].get("language", DEFAULT_LANGUAGE)
+    nx_graph = await knowledge_graph_inst.get_graph()
+    if "extract_params" in nx_graph.graph:
+        language = nx_graph.graph["extract_params"].get("language", language)
     lang_tag = inv_languages[language]
+
     enable_vdb_load_for_extract = global_config["addon_params"].get("enable_vdb_load_for_extract", True)
 
     for maybe_nodes, maybe_edges in chunk_results:
@@ -1204,23 +1224,28 @@ async def extract_entity_types(
     pipeline_status_lock=None,
     llm_response_cache: BaseKVStorage | None = None,
     text_chunks_storage: BaseKVStorage | None = None,
+    ** extract_params,
 ) -> list:
     use_llm_func: callable = global_config["llm_model_func"]
     entity_extract_max_gleaning = global_config["entity_extract_max_gleaning"]
 
     ordered_chunks = list(chunks.items())
-    # add language and example number params to prompt
-    language = global_config["addon_params"].get(
+    # add extract and example number params to prompt
+    language = extract_params.get("language", global_config["addon_params"].get(
         "language", DEFAULT_LANGUAGE
-    )
-    iri_language = global_config["addon_params"].get(
+    ))
+    iri_language = extract_params.get("iri_language", global_config["addon_params"].get(
         "iri_language", DEFAULT_IRI_LANGUAGE
-    )
+    ))
+    iri_format = extract_params.get("iri_format", global_config["addon_params"].get(
+        "iri_format", "camelCase"
+    ))
+
     datatypes = global_config["addon_params"].get(
         "datatypes", PROMPTS["DEFAULT_DATATYPES"]
     )
     example_number = global_config["addon_params"].get("example_number", None)
-    iri_format = global_config["addon_params"].get("iri_format", "camelCase")
+
     if iri_format == "camelCase":
         prompt_examples = PROMPTS["entity_extraction_CC_examples"]
     else:
@@ -1687,7 +1712,14 @@ async def _build_query_context(
     global_config: dict[str, str],
     chunks_vdb: BaseVectorStorage = None,
 ):
+    
     logger.info(f"Process {os.getpid()} building query context...")
+
+    # Check if graph is empty
+    nx_graph = await knowledge_graph_inst.get_graph()
+    if nx_graph.number_of_nodes() == 0:
+        logger.warning("The kowledge graph is empty, maybe the storage is damaged")
+        return
 
     context_type = query_param.query_context_type
     
