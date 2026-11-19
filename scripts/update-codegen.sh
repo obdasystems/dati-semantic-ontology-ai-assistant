@@ -43,10 +43,6 @@ echo "## UPDATE GENERATED PACKAGES"
 echo "########################################"
 echo
 
-# momentary fix waiting https://github.com/OpenAPITools/openapi-generator/issues/20115
-echo "Remove convert_api.py and convert_api_base.py from generation"
-rm "${OUTPUT_DIR}/src/ai_assistant/server/apis/convert_api.py" "${OUTPUT_DIR}/src/ai_assistant/server/apis/convert_api_base.py"
-
 echo "* Copying apis package..."
 mv "${OUTPUT_DIR}/src/ai_assistant/server/apis/"* "./src/ai_assistant/server/apis/"
 echo "* Copying models package..."
