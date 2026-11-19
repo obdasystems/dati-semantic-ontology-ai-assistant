@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ######################################################################
 ## Utility script to perform update for codegen for the ai_assistant
 ##
@@ -9,8 +9,12 @@
 ######################################################################
 
 # Global variables setup
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PARENT_DIR="$(dirname "${SCRIPT_DIR}")"
+
 OPENAPI_EXEC="${OPENAPI_EXEC:-"`command -v openapi-generator-cli`"}"
-OPENAPI_SPEC="${OPENAPI_SPEC:-"../swaggers/bundled/ai-assistant.yaml"}"
+OPENAPI_SPEC="${OPENAPI_SPEC:-https://obdasystems.github.io/swaggers/bundled/ontolog-ia.yaml}"
+OPENAPI_TMPL="${OPENAPI_TMPL:-"${PARENT_DIR}/openapi_templates/"}"
 OUTPUT_DIR="${OUTPUT_DIR:-"`mktemp -d -t ai_assistant.gen-XXX`"}"
 
 # Check if the generator is present
@@ -28,8 +32,9 @@ echo
 
 "${OPENAPI_EXEC}" generate \
     -g python-fastapi \
-    -i "${OPENAPI_SPEC}"\
+    -i "${OPENAPI_SPEC}" \
     -o "${OUTPUT_DIR}" \
+    -t "${OPENAPI_TMPL}" \
     --additional-properties="packageName=ai_assistant.server,fastapiImplementationPackage=impl"
 
 # Update generated files
